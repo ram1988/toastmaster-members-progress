@@ -1,0 +1,70 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.css">  
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.js"></script>
+	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/rowreorder/1.1.2/js/dataTables.rowReorder.min.js"></script>
+	<script type="text/javascript">
+			$(document).ready(function() {
+				$('#program_sheet_editor').DataTable({
+					rowReorder: true
+				});
+			} );
+			
+			function addRow() {
+				var newRow = document.createElement("tr");		
+				
+				var length = $("#program_sheet_editor tbody tr").length;
+								
+				var order = document.createElement("td");
+				order.appendChild(document.createTextNode(length));
+				var time = document.createElement("td");
+				var newTextBox = document.createElement("input");
+				time.appendChild(newTextBox);
+				var programName = document.createElement("td");
+				newTextBox = document.createElement("input");
+				programName.appendChild(newTextBox);
+				var duration = document.createElement("td");
+				newTextBox = document.createElement("input");
+				duration.appendChild(newTextBox);
+				var appointHolder = document.createElement("td");
+				newTextBox = document.createElement("input");
+				appointHolder.appendChild(newTextBox);
+				
+				newRow.appendChild(order);
+				newRow.appendChild(time);
+				newRow.appendChild(programName);
+				newRow.appendChild(duration);
+				newRow.appendChild(appointHolder);
+								
+				$("#program_sheet_editor tbody").append(newRow);
+			}
+    </script>
+</head>
+<body>
+	<input type="submit" value="Add Item" onClick="addRow()">
+	<table id="program_sheet_editor" class="display" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Order</th>
+                <th>Time</th>
+                <th>Program Name</th>
+                <th>Duration</th>
+                <th>Appointment Holder</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <th>Order</th>
+                <th>Time</th>
+                <th>Program Name</th>
+                <th>Duration</th>
+                <th>Appointment Holder</th>
+            </tr>
+        </tfoot>
+        <tbody>
+           
+        </tbody>
+    </table>
+</body>
+</html>
