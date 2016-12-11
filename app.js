@@ -1,6 +1,7 @@
 const http         = require('http'),
       fs           = require('fs'),
       path         = require('path'),
+	  url_instance = require('url'),
 	  csv          = require("fast-csv"),
       contentTypes = require('./utils/content-types'),
       sysInfo      = require('./utils/sys-info'),
@@ -17,50 +18,71 @@ let server = http.createServer(function (req, res) {
     url += 'index.html';
   }
 
+  console.log('Request URL'+url)
   // IMPORTANT: Your application HAS to respond to GET /health with status 200
   //            for OpenShift health monitoring
 
   if (url == '/health') {
     res.writeHead(200);
     res.end();
-  } else if(url == '/members') {
-	mysql_manager.select_query("SELECT * FROM members", 
-							function(rows) {
-								res.end(req.method);
-							});  
-	  
-  } 
-  else if(url == '/program_list') {
-		res.setHeader('Content-Type', 'application/json');
-		res.setHeader('Cache-Control', 'no-cache, no-store');
-		res.end(JSON.stringify(program_list.get_program_list()));	  
-  } else if(url == '/members/insert') {
+  } else if(url.match(/member_progress/)) {
+	var queryObj = url_instance.parse(url,true).query;
+	console.log(queryObj);
+	if(queryObj.name){
 		var params = {
-			"id":3,
-			"club_name":"IBM",
-			"comm_track":"CC",
-			"leader_track":"CL",
-			"first_name":"ram",
-			"last_name":"nar",
-			"email":"ss@dd.com"
-		};
-		mysql_manager.insert_query('INSERT INTO members SET ?', params, 
-								function(result) {
-									res.end(result);
-								});  	  
-  } 
-  else if(url == '/meeting_agenda/update') {
-		var params = [{
-			"id":3,
-			"time":"IBM",
-			"program_name":"CC",
-			"appointment_holder":""
-		}];
-		mysql_manager.insert_query('INSERT INTO meeting_agenda SET ?', params, 
-								function(result) {
-									res.end(result);
+		   "name": queryObj.name
+		}
+		mysql_manager.select_param_query("SELECT * FROM members a, members_progress b WHERE a.id=b.member_id AND ?", params, 
+								function(rows) {
+										
+										fs.readFile('./static/memberprogress_status.html', function (err, data) {
+											  if (err) {
+												res.writeHead(404);
+												res.end('Not found');
+											  } else {
+												res.setHeader('Content-Type', 'text/html');
+												res.setHeader('Cache-Control', 'no-cache, no-store');
+												var data = new String(data);
+												 console.log('the dataa-->'+data);
+												var member_record = rows[0];
+												data = data.replace("$name$", member_record.name);
+												if(member_record.comm_track == "") {
+													data = data.replace("$cc_class$", "active");
+													data = data.replace("$acb_class$", "");
+													data = data.replace("$acs_class$", "");
+													data = data.replace("$acg_class$", "");									
+												} 
+												else if(member_record.comm_track == "CC") {
+													data = data.replace("$cc_class$", "previous visited");
+													data = data.replace("$acb_class$", "active");
+													data = data.replace("$acs_class$", "");
+													data = data.replace("$acg_class$", "");									
+												} 
+												else if(member_record.comm_track == "ACB") {
+													data = data.replace("$cc_class$", "visited first");
+													data = data.replace("$acb_class$", "previous visited");
+													data = data.replace("$acs_class$", "active");
+													data = data.replace("$acg_class$", "");
+												} 
+												else if(member_record.comm_track == "ACS") {
+													data = data.replace("$cc_class$", "visited first");
+													data = data.replace("$acb_class$", "previous visited");
+													data = data.replace("$acs_class$", "previous visited");
+													data = data.replace("$acg_class$", "active");
+												} 
+												else if(member_record.comm_track == "ACG") {
+													data = data.replace("$cc_class$", "visited first");
+													data = data.replace("$acb_class$", "previous visited");
+													data = data.replace("$acs_class$", "previous visited");
+													data = data.replace("$acg_class$", "previous visited");
+												} 
+												res.write(data.toString());
+												res.end();
+											  }
+										});
 								});  
-	  
+								
+	}
   } 
   else if (req.url === '/uploadfile1') {
     res.writeHead(200, {'content-type': 'text/html'});
@@ -72,36 +94,6 @@ let server = http.createServer(function (req, res) {
       '</form>'
     );
   }
-  /*else if(url == '/program_sheet/upload') {
-		var preparedSpeakers = {};
-		var prepSpeechColumn = -1;
-		var prepEvalColumn = -1;
-	  
-	  
-	    csv.fromPath("TMChapterMeetingAgenda20-Oct-2016.csv")
-			 .on("data", function(data){
-				 if(prepSpeechColumn != -1) {
-					 var speech_title = data[prepSpeechColumn];
-					 if(speech_title == "Timer's Report") {
-						 prepSpeechColumn = -1;
-						 return;
-					 }
-					 var speaker_name = data[prepSpeechColumn+2];
-					 preparedSpeakers[speech_title] = speaker_name;
-				 } else {
-					 for(var i=0;i<data.length;i++) {
-						 if(data[i] == "PREPARED SPEECHES:") {
-							  prepSpeechColumn = i;
-							  console.log("true");
-						 }
-					 }
-				 }
-			 })
-			 .on("end", function(){
-				 console.log(preparedSpeakers);
-				 console.log("done");
-			 });
-  }*/
   else if (req.url === '/fileupload_status') {
     var form = new multiparty.Form();
 	var destPath;
@@ -164,18 +156,16 @@ let server = http.createServer(function (req, res) {
 								count++;
 								if(count == preparedSpeakers.length) {
 									res.writeHead(200, {'content-type': 'text/plain'});
-									res.end("Successfully Uploaded the file");
+									res.end("Hey!!!Successfully Uploaded the file");
 								}
 							});   
 					}
-				  //res.end(JSON.stringify(preparedSpeakers));
-				  //res.end('received files:\n\n '+util.inspect(files));
 			 });
      
     });
   }
-  else if(url == '/meeting_agenda/select') {
-		mysql_manager.select_query('SELECT * FROM meeting_agenda WHERE id= :id', params, 
+  else if(url == '/list_members') {
+		mysql_manager.select_query('SELECT * FROM members', 
 								function(result) {
 									//process result and send the response
 									res.setHeader('Content-Type', 'application/json');

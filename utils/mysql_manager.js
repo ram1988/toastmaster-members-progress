@@ -22,6 +22,16 @@ var select_query = function(query, callback) {
     });
 }
 
+var select_param_query = function(query, values, callback) {
+	var connection = getConnection();
+	connection.query(query, values, function(err,rows){
+		 if(!err) {
+			 callback(rows);
+		 }         
+		 connection.end();
+    });
+}
+
 var insert_query = function(query, values, callback) {
 	var connection = getConnection();
 	connection.query(query,values,function(err,result){
@@ -82,4 +92,4 @@ var invoke_sp = function(sp_name, arglist, callback) {
 		 connection.end();
     });
 }
-module.exports = {select_query, insert_query, update_query, invoke_sp}
+module.exports = {select_query, select_param_query, insert_query, update_query, invoke_sp}

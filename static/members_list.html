@@ -1,0 +1,56 @@
+<html>
+ <head>
+	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>	 
+    <link rel="stylesheet" media="all" href="https://s3.amazonaws.com/dynatable-docs-assets/css/reset.css" />
+    <link rel="stylesheet" media="all" href="https://s3.amazonaws.com/dynatable-docs-assets/css/bootstrap-2.3.2.min.css" />
+    <link rel="stylesheet" media="all" href="https://s3.amazonaws.com/dynatable-docs-assets/css/application.css" />
+    <link rel="stylesheet" media="all" href="https://s3.amazonaws.com/dynatable-docs-assets/css/project.css" />
+    <link rel="stylesheet" media="all" href="https://s3.amazonaws.com/dynatable-docs-assets/css/pygments.css" />
+    <link rel="stylesheet" media="all" href="https://s3.amazonaws.com/dynatable-docs-assets/css/share.css" />
+    <link href='//fonts.googleapis.com/css?family=Nunito:300' rel='stylesheet' type='text/css'>
+    <link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" media="all" href="https://s3.amazonaws.com/dynatable-docs-assets/css/dynatable-docs.css" />
+	<link rel="stylesheet" media="all" href="https://s3.amazonaws.com/dynatable-docs-assets/css/jquery.dynatable.css" />
+	
+	<script type='text/javascript' src='https://s3.amazonaws.com/dynatable-docs-assets/js/jquery.dynatable.js'></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			 $.get("http://tmclubmanager-summary.rhcloud.com/list_members", function(data, status){
+				var members_list = [];
+				
+				for(var i=0;i<data.length;i++) {
+					var record = {};
+					
+					record["name"] = "<a href='/member_progress?name="+data[i]["name"]+"'>"+data[i]["name"]+"</a>";
+					record["communication"] = data[i]["comm_track"].toString();
+					record["leadership"] = data[i]["leader_track"].toString();
+					
+					members_list.push(record);
+				}
+				
+				$('#member-progress').dynatable({
+					dataset: {
+						records: members_list
+					}
+				});
+			});
+			
+		});	  
+	</script>
+</head>
+<body>
+
+<table id="member-progress" class="table table-bordered">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Communication</th>
+			<th>Leadership</th>
+		</tr>
+	</thead>
+	<tbody>
+	</tbody>
+</table>
+
+</body>
+</html>
