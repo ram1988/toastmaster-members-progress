@@ -10,22 +10,44 @@
   <! -- To test add 'active' class and 'visited' class to different li elements -->
   
 <div class="checkout-wrap">
-  <ul class="checkout-bar">
+  <div>
+	  <ul class="checkout-bar">
 
-    <!--<li id="cc" class="visited first">-->
-    <li id="cc" class="$cc_class$">
-      <a href="#">CC</a>
-    </li>
-    
-    <!--<li id="acb" class="previous visited">ACB</li>-->
-    <li id="acb" class="$acb_class$">ACB</li>
-	
-	<li id="acs" class="$acs_class$">ACS</li>
-    
-    <!--<li id="acg"  class="active">ACG</li>-->
-    <li id="acg"  class="$acg_class$">ACG</li>
-       
-  </ul>
+		<!--<li id="cc" class="visited first">-->
+		<li id="cc" class="$cc_class$">
+		  <a href="#">CC</a>
+		</li>
+		
+		<!--<li id="acb" class="previous visited">ACB</li>-->
+		<li id="acb" class="$acb_class$">ACB</li>
+		
+		<li id="acs" class="$acs_class$">ACS</li>
+		
+		<!--<li id="acg"  class="active">ACG</li>-->
+		<li id="acg"  class="$acg_class$">ACG</li>
+		   
+	  </ul>
+  </div>
+  
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <div>
+	<table border="1">
+		 <tr>
+			<th>S.No</th>
+			<th>Project Name</th>
+			<th>Speech Title</th>
+			<th>Project Date</th>
+		 <tr>
+		<tbody>	
+			$project_table_body$
+		</tbody>
+	</table>
+  </div>
 </div>
+ 
 </body>
 </html>

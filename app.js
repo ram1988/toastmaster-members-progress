@@ -26,6 +26,7 @@ let server = http.createServer(function (req, res) {
     res.writeHead(200);
     res.end();
   } else if(url.match(/member_progress/)) {
+	  //Logic can be tweaked to pass the title and name from front end instead of querying against the DB
 	var queryObj = url_instance.parse(url,true).query;
 	console.log(queryObj);
 	if(queryObj.name){
@@ -76,6 +77,17 @@ let server = http.createServer(function (req, res) {
 													data = data.replace("$acs_class$", "previous visited");
 													data = data.replace("$acg_class$", "previous visited");
 												} 
+												
+												var project_table_body = "";
+												for(var i=0;i<rows.length;i++) {
+													project_table_body += "<tr>";
+													project_table_body += "<td>"+(i+1)+"</td>";
+													project_table_body += "<td>"+rows[i]["project_title"]+"</td>";
+													project_table_body += "<td>TBD</td>";
+													project_table_body += "<td>"+rows[i]["project_date"]+"</td>";
+													project_table_body += "</tr>";
+												}
+												data = data.replace("$project_table_body$", project_table_body);
 												res.write(data.toString());
 												res.end();
 											  }
