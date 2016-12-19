@@ -35,7 +35,27 @@
 				});
 			});
 			
+			$("#uploadForm").submit(function() {
+				var formData = new FormData($(this)[0]);
+				
+				$.ajax({
+					url: '/fileupload_status',
+					type: 'post',
+					async: false,
+					data:formData,
+					success: function(data) {
+						alert("File uploaded successfully");
+					},
+					cache: false,
+					processData:false,
+					contentType:false
+				});
+				
+				return false;			
+			});
+			
 		});	  
+		
 	</script>
 </head>
 <body>
@@ -51,6 +71,13 @@
 	<tbody>
 	</tbody>
 </table>
+
+<h2>Upload Program Sheet</h2>
+<form id="uploadForm" enctype="multipart/form-data" method="post">
+	<input type="text" name="title"><br>
+	<input type="file" name="upload" multiple="multiple"><br>
+	<input type="submit" value="Upload">
+</form>
 
 </body>
 </html>

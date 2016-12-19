@@ -96,16 +96,6 @@ let server = http.createServer(function (req, res) {
 								
 	}
   } 
-  else if (req.url === '/uploadfile1') {
-    res.writeHead(200, {'content-type': 'text/html'});
-    res.end(
-      '<form action="/fileupload_status" enctype="multipart/form-data" method="post">'+
-      '<input type="text" name="title"><br>'+
-      '<input type="file" name="upload" multiple="multiple"><br>'+
-      '<input type="submit" value="Upload">'+
-      '</form>'
-    );
-  }
   else if (req.url === '/fileupload_status') {
     var form = new multiparty.Form();
 	var destPath;
@@ -125,6 +115,7 @@ let server = http.createServer(function (req, res) {
 	  var preparedSpeakers = [];
 	  var prepSpeechColumn = -1;
 	  var prepEvalColumn = -1;
+	  var project_date = "";
 	  csv.fromPath(file_name)
 			 .on("data", function(data){
 				 if(prepSpeechColumn != -1) {
@@ -143,6 +134,16 @@ let server = http.createServer(function (req, res) {
 							  prepSpeechColumn = i;
 							  console.log("true");
 						 }
+						 else if(project_date == "" && data[i].match(/Chapter(\s*)Meeting/g)!=null) {
+							  project_date = data[i+2];
+							  var tokens = project_date.split(",");
+							  var year = new String(tokens[2]).split("(");
+							  var date_str = tokens[1]+","+year[0];
+							  var date_obj = new Date(date_str);
+							  project_date = date_obj.getFullYear()+"-"+(date_obj.getMonth()+1)+"-"+date_obj.getDate();
+							  console.log("project date--->"+project_date);
+							  break;
+						 }
 					 }
 				 }
 			 })
@@ -160,7 +161,7 @@ let server = http.createServer(function (req, res) {
 							speaker_details_tokens[1]?"'"+speaker_details_tokens[1].trim()+"'":"''", //comm_track
 							speaker_details_tokens[2]?"'"+speaker_details_tokens[2].trim()+"'":"''", //leader_track
 							"'"+speaker_details[speaker_details_key].trim()+"'",//project name
-							"''"//project date - TBI
+							"'"+project_date+"'"
 						];
 						
 						mysql_manager.invoke_sp("manage_speakers_details", params,
@@ -170,7 +171,7 @@ let server = http.createServer(function (req, res) {
 									res.writeHead(200, {'content-type': 'text/plain'});
 									res.end("Hey!!!Successfully Uploaded the file");
 								}
-							});   
+						});   
 					}
 			 });
      
