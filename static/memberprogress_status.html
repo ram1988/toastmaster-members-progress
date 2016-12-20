@@ -3,6 +3,31 @@
     <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
 	<link href='http://fonts.googleapis.com/css?family=PT+Sans+Caption:400,700' rel='stylesheet' type='text/css'>
 	<link href='http://tmclubmanager-summary.rhcloud.com/progress_bar.css' rel='stylesheet' type='text/css'>
+	<script type="text/javascript">
+		function updateSpeechTitle(id, name, textBoxId) {
+			var params = {};
+			params["id"] = id;
+			params["speech_title"] = $("#"+textBoxId).val();
+						
+			$.post('/update_speech_title',params,
+					function(data) {
+						alert("Speech title updated successfully");
+						window.location.href = "/members_progress?name="+name;
+					});
+		
+		}
+		
+		function deleteSpeechTitle(id, name) {
+			var params = {};
+			params["id"] = id;
+			
+			$.post('/delete_record', params, 
+					function(data) {
+						alert("Record deleted successfully");
+						window.location.href = "/members_progress?name="+name;
+					});
+		}
+	</script>
  </head>
  
  <body>

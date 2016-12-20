@@ -8,6 +8,7 @@ const http         = require('http'),
       mysql_manager = require('./utils/mysql_manager'),
 	  program_list = require('./utils/program_list'),	 
 	  multiparty = require('multiparty'),
+	  querystring = require('querystring'),
 	  util = require('util'),
       env          = process.env;
 
@@ -25,7 +26,7 @@ let server = http.createServer(function (req, res) {
   if (url == '/health') {
     res.writeHead(200);
     res.end();
-  } else if(url.match(/member_progress/)) {
+  } else if(url.match(/members_progress/)) {
 	  //Logic can be tweaked to pass the title and name from front end instead of querying against the DB
 	var queryObj = url_instance.parse(url,true).query;
 	console.log(queryObj);
@@ -80,11 +81,13 @@ let server = http.createServer(function (req, res) {
 												
 												var project_table_body = "";
 												for(var i=0;i<rows.length;i++) {
+													var text_id = rows[i]["id"]+"_"+(i+1);
 													project_table_body += "<tr>";
 													project_table_body += "<td>"+(i+1)+"</td>";
 													project_table_body += "<td>"+rows[i]["project_title"]+"</td>";
-													project_table_body += "<td>TBD</td>";
+													project_table_body += "<td><input type='text' id='"+text_id+"' value='"+rows[i]["speech_title"]+"' /></td>";
 													project_table_body += "<td>"+rows[i]["project_date"]+"</td>";
+													project_table_body += "<td><input type='button' value='Update' onclick='updateSpeechTitle("+rows[i]["id"]+",\""+queryObj.name+"\",\""+text_id+"\")'/> <input type='button' value='Delete' onclick='deleteSpeechTitle("+rows[i]["id"]+",\""+queryObj.name+"\")'/></td>";
 													project_table_body += "</tr>";
 												}
 												data = data.replace("$project_table_body$", project_table_body);
@@ -186,6 +189,27 @@ let server = http.createServer(function (req, res) {
 									res.end(JSON.stringify(result));
 								});  
 	  
+  }
+  else if (url == '/update_speech_title') {
+	  console.log("Request Method-->"+req.method);
+	  if(req.method == "POST") {
+		    var reqBody='';
+            req.on('data', function (data) {
+                reqBody +=data;
+            });
+            req.on('end',function(){
+				reqBody = querystring.parse(reqBody);
+				console.log(reqBody["id"]+"--"+reqBody["speech_title"]);
+				var params = [reqBody["speech_title"],reqBody["id"]];
+				mysql_manager.update_query('UPDATE members_progress SET speech_title=? WHERE id=?', params, 
+								function(result) {
+									//process result and send the response
+									res.setHeader('Content-Type', 'application/json');
+									res.setHeader('Cache-Control', 'no-cache, no-store');
+									res.end("0");
+								});
+            });
+	  }
   }
   else if (url == '/info/gen' || url == '/info/poll') {
     res.setHeader('Content-Type', 'application/json');
