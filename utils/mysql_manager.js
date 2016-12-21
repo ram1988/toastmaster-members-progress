@@ -32,27 +32,7 @@ var select_param_query = function(query, values, callback) {
     });
 }
 
-var insert_query = function(query, values, callback) {
-	var connection = getConnection();
-	connection.query(query,values,function(err,result){
-		 if (err) {
-			return connection.rollback(function() {
-			  callback(-1);
-			});
-		  }  
-		  connection.commit(function(err) {
-			if (err) {
-			  return connection.rollback(function() {
-				callback(-1);
-			  });
-			}
-			callback(0);
-			connection.end();
-		  });
-	});
-}
-
-var update_query = function(query, values, callback) {
+var iud_query = function(query, values, callback) {
 	var connection = getConnection();
 	connection.query(query,values,function(err,result){
 		 if (err) {
@@ -92,4 +72,4 @@ var invoke_sp = function(sp_name, arglist, callback) {
 		 connection.end();
     });
 }
-module.exports = {select_query, select_param_query, insert_query, update_query, invoke_sp}
+module.exports = {select_query, select_param_query, iud_query, invoke_sp}

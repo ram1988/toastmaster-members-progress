@@ -190,8 +190,8 @@ let server = http.createServer(function (req, res) {
 								});  
 	  
   }
-  else if (url == '/update_speech_title') {
-	  console.log("Request Method-->"+req.method);
+  else if (url == '/update_speechtitle') {
+	  console.log("Update Request Method-->"+req.method);
 	  if(req.method == "POST") {
 		    var reqBody='';
             req.on('data', function (data) {
@@ -201,7 +201,28 @@ let server = http.createServer(function (req, res) {
 				reqBody = querystring.parse(reqBody);
 				console.log(reqBody["id"]+"--"+reqBody["speech_title"]);
 				var params = [reqBody["speech_title"],reqBody["id"]];
-				mysql_manager.update_query('UPDATE members_progress SET speech_title=? WHERE id=?', params, 
+				mysql_manager.iud_query('UPDATE members_progress SET speech_title=? WHERE id=?', params, 
+								function(result) {
+									//process result and send the response
+									res.setHeader('Content-Type', 'application/json');
+									res.setHeader('Cache-Control', 'no-cache, no-store');
+									res.end("0");
+								});
+            });
+	  }
+  }
+  else if (url == '/delete_record') {
+	  console.log("Delete Request Method-->"+req.method);
+	  if(req.method == "POST") {
+		    var reqBody='';
+            req.on('data', function (data) {
+                reqBody +=data;
+            });
+            req.on('end',function(){
+				reqBody = querystring.parse(reqBody);
+				console.log(reqBody["id"]);
+				var params = [reqBody["id"]];
+				mysql_manager.iud_query('DELETE FROM members_progress WHERE id=?', params, 
 								function(result) {
 									//process result and send the response
 									res.setHeader('Content-Type', 'application/json');

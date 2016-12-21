@@ -9,7 +9,7 @@
 			params["id"] = id;
 			params["speech_title"] = $("#"+textBoxId).val();
 						
-			$.post('/update_speech_title',params,
+			$.post('/update_speechtitle',params,
 					function(data) {
 						alert("Speech title updated successfully");
 						window.location.href = "/members_progress?name="+name;
