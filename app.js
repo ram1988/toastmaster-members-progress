@@ -15,6 +15,8 @@ const http         = require('http'),
 
 let server = http.createServer(function (req, res) {
   let url = req.url;
+  
+  
   if (url == '/') {
     url += 'index.html';
   }
@@ -151,39 +153,65 @@ let server = http.createServer(function (req, res) {
 				 }
 			 })
 			 .on("end", function(){
-				  var count = 0;
-				  //res.write('received fields:\n\n '+util.inspect(fields));
-				  for(var i=0;i<preparedSpeakers.length;i++) {
-					  var speaker_details = preparedSpeakers[i];
-					  var speaker_details_key = Object.keys(speaker_details)[0];
-					  console.log("content-->"+speaker_details_key);
-					  var speaker_details_tokens = speaker_details_key.split(",");
-					  var speaker_name = speaker_details_tokens[0].trim();
-					  var params = [							
-							"'"+speaker_name+"'",
-							speaker_details_tokens[1]?"'"+speaker_details_tokens[1].trim()+"'":"''", //comm_track
-							speaker_details_tokens[2]?"'"+speaker_details_tokens[2].trim()+"'":"''", //leader_track
-							"'"+speaker_details[speaker_details_key].trim()+"'",//project name
-							"'"+project_date+"'"
-						];
-						
-						mysql_manager.invoke_sp("manage_speakers_details", params,
-							function(rows) {
-								count++;
-								if(count == preparedSpeakers.length) {
-									res.writeHead(200, {'content-type': 'text/plain'});
-									res.end("Hey!!!Successfully Uploaded the file");
-								}
-						});   
-					}
-			 });
-     
-    });
+				    var preparedSpeakersList = preparedSpeakers;
+					
+				    mysql_manager.select_query("SELECT COUNT(*) AS project_count, b.comm_track as comm_track, name FROM members a,"+
+													"members_progress b WHERE a.id = b.member_id GROUP BY member_id,b.comm_track",                                       
+									function(result) {											
+										  var count = 0;
+										  var cc_titles = ["CC","ACB","ACS","ACG"];
+										  
+										  //res.write('received fields:\n\n '+util.inspect(fields));
+										  for(var i=0;i<preparedSpeakersList.length;i++) {
+											  var speaker_details = preparedSpeakersList[i];
+											  var speaker_details_key = Object.keys(speaker_details)[0];
+											  console.log("content-->"+speaker_details_key);
+											  var speaker_details_tokens = speaker_details_key.split(",");
+											  var speaker_name = speaker_details_tokens[0].trim();
+											  var comm_track = speaker_details_tokens[1];
+											  comm_track = comm_track?comm_track.trim():"";
+											  var idx = cc_titles.indexOf(comm_track);
+											  var active_comm_track = "";
+											  if(idx < cc_titles.length-1) {
+												 console.log("idx11--->"+idx);
+												 active_comm_track = cc_titles[idx+1];
+											  }
+											  
+											  console.log("comm_track--->"+comm_track+"---"+result);
+											  for(var j=0;j<result.length;j++) {
+												  console.log("record--->"+result[j]["name"] +"--"+result[j]["project_count"]);
+												  if(speaker_name == result[j]["name"] && result[j]["project_count"] == 10 &&
+												                                 active_comm_track == result[j]["comm_track"] ) {													  
+													  console.log("idx--->"+idx);
+													  comm_track = active_comm_track;
+													  break;
+												  }
+											   }
+											  var params = [							
+													"'"+speaker_name+"'",
+													comm_track!=""?"'"+comm_track+"'":"''", //comm_track
+													speaker_details_tokens[2]?"'"+speaker_details_tokens[2].trim()+"'":"''", //leader_track
+													"'"+speaker_details[speaker_details_key].trim()+"'",//project name
+													"'"+project_date+"'",
+													"'"+active_comm_track+"'"
+												];
+												
+												mysql_manager.invoke_sp("manage_speakers_details", params,
+													function(rows) {
+														count++;
+														if(count == preparedSpeakersList.length) {
+															res.writeHead(200, {'content-type': 'text/plain'});
+															res.end("Hey!!!Successfully Uploaded the file");
+														}
+												});   
+											}											
+									});     
+            });
+		});
   }
   else if(url == '/list_members') {
-		mysql_manager.select_query('SELECT * FROM members', 
+		mysql_manager.select_query("SELECT * FROM members",
 								function(result) {
-									//process result and send the response
 									res.setHeader('Content-Type', 'application/json');
 									res.setHeader('Cache-Control', 'no-cache, no-store');
 									res.end(JSON.stringify(result));

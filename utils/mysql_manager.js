@@ -15,6 +15,7 @@ var getConnection = function() {
 var select_query = function(query, callback) {
 	var connection = getConnection();
 	connection.query(query,function(err,rows){
+		console.log("select_query-->"+err);
 		 if(!err) {
 			 callback(rows);
 		 }         
